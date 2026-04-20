@@ -193,44 +193,63 @@ int head_update(const ObjectID *new_commit) {
 //   - head_update       : moves the branch pointer to your new commit
 //
 // Returns 0 on success, -1 on error.
-int commit_create(const char *message, ObjectID *commit_id_out) {
-Commit commit;
+int commit_create(const char *message, ObjectID *commit_id_out)
+{
+    Commit commit;
+    memset(&commit, 0, sizeof(commit));
 
-memset(&commit, 0, sizeof(commit));
+    /* build tree from staged index */
+    if (tree_from_index(&commit.tree) != 0) {
+        printf("tree_from_index failed\n");
+        return -1;
+    }
 
-if (tree_from_index(&commit.tree) != 0)
-    return -1;
+    /* commit message */
+    strncpy(commit.message, message, sizeof(commit.message) - 1);
+    commit.message[sizeof(commit.message) - 1] = '\0';
 
-strncpy(commit.message, message, sizeof(commit.message) - 1);
+    /* parent commit if exists */
+    ObjectID parent_id;
+    if (head_read(&parent_id) == 0) {
+        commit.parent = parent_id;
+        commit.has_parent = 1;
+    } else {
+        commit.has_parent = 0;
+    }
 
-ObjectID parent_id;
-if (head_read(&parent_id) == 0) {
-    commit.parent = parent_id;
-    commit.has_parent = 1;
-}
+    /* author + timestamp */
+    strncpy(commit.author, pes_author(), sizeof(commit.author) - 1);
+    commit.author[sizeof(commit.author) - 1] = '\0';
+    commit.timestamp = (uint64_t)time(NULL);
 
-strncpy(commit.author, pes_author(), sizeof(commit.author) - 1);
-commit.timestamp = (uint64_t)time(NULL);
+    /* serialize commit */
+    void *data = NULL;
+    size_t len = 0;
 
-void *data;
-size_t len;
+    if (commit_serialize(&commit, &data, &len) != 0) {
+        printf("commit_serialize failed\n");
+        return -1;
+    }
 
-if (commit_serialize(&commit, &data, &len) != 0)
-    return -1;
+    /* write commit object */
+    ObjectID new_id;
+    if (object_write(OBJ_COMMIT, data, len, &new_id) != 0) {
+        printf("object_write failed\n");
+        free(data);
+        return -1;
+    }
 
-ObjectID new_id;
-
-if (object_write(OBJ_COMMIT, data, len, &new_id) != 0) {
     free(data);
-    return -1;
-}
 
-free(data);
+    /* update HEAD */
+    if (head_update(&new_id) != 0) {
+        printf("head_update failed\n");
+        return -1;
+    }
 
-if (head_update(&new_id) != 0)
-    return -1;
-if (commit_id_out)
-    *commit_id_out = new_id;
+    /* return created id */
+    if (commit_id_out != NULL)
+        *commit_id_out = new_id;
 
-return 0;
+    return 0;
 }

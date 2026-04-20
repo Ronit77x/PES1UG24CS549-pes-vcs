@@ -133,39 +133,52 @@ int tree_serialize(const Tree *tree, void **data_out, size_t *len_out) {
 //   - object_write    : save that binary buffer to the store as OBJ_TREE
 //
 // Returns 0 on success, -1 on error.
-int tree_from_index(ObjectID *id_out) {
-
-FILE *fp = fopen(".pes/index", "rb");
-if (!fp) return -1;
-
-Index idx;
-if (fread(&idx, sizeof(Index), 1, fp) != 1) {
-    fclose(fp);
-    return -1;
-}
-fclose(fp);
-
-Tree tree;
-tree.count = 0;
-
-for (int i = 0; i < idx.count; i++) {
-    if (tree.count >= MAX_TREE_ENTRIES)
+int tree_from_index(ObjectID *id_out)
+{
+    FILE *fp = fopen(".pes/index", "r");
+    if (!fp)
         return -1;
 
-    TreeEntry *entry = &tree.entries[tree.count++];
+    Tree tree;
+    memset(&tree, 0, sizeof(tree));
 
-    entry->mode = idx.entries[i].mode;
-    strcpy(entry->name, idx.entries[i].path);
-    entry->hash = idx.entries[i].hash;
-}
-void *data;
-size_t len;
+    while (tree.count < MAX_TREE_ENTRIES) {
+        TreeEntry *entry = &tree.entries[tree.count];
 
-if (tree_serialize(&tree, &data, &len) != 0)
-    return -1;
+        char hash[65];
+        long mtime;
+        unsigned size;
 
-int result = object_write(OBJ_TREE, data, len, id_out);
+        int r = fscanf(fp, "%o %64s %ld %u %255s",
+                       &entry->mode,
+                       hash,
+                       &mtime,
+                       &size,
+                       entry->name);
 
-free(data);
-return result;
+        if (r == EOF)
+            break;
+
+        if (r != 5) {
+            fclose(fp);
+            return -1;
+        }
+
+        memcpy(&entry->hash, hash, sizeof(entry->hash));
+
+        tree.count++;
+    }
+
+    fclose(fp);
+
+    void *data;
+    size_t len;
+
+    if (tree_serialize(&tree, &data, &len) != 0)
+        return -1;
+
+    int result = object_write(OBJ_TREE, data, len, id_out);
+
+    free(data);
+    return result;
 }
