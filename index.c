@@ -14,8 +14,9 @@
 //
 // PROVIDED functions: index_find, index_remove, index_status
 // TODO functions:     index_load, index_save, index_add
-
+#include "pes.h"
 #include "index.h"
+#include "commit.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,6 +25,7 @@
 #include <unistd.h>
 #include <dirent.h>
 
+int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out);
 // ─── PROVIDED ────────────────────────────────────────────────────────────────
 
 // Find an index entry by path (linear scan).
@@ -138,21 +140,25 @@ int index_load(Index *index) {
     index->count = 0;
 
     FILE *fp = fopen(".pes/index", "r");
-    if (!fp) return -1;
+
+    if (!fp) {
+        return 0;   // no index yet = empty index
+    }
 
     char hex[HASH_HEX_SIZE + 1];
 
     while (index->count < MAX_INDEX_ENTRIES) {
         IndexEntry *e = &index->entries[index->count];
 
-        int r = fscanf(fp, "%o %64s %ld %zu %255s",
+        int r = fscanf(fp, "%o %64s %ld %u %255s",
                        &e->mode,
                        hex,
                        &e->mtime_sec,
                        &e->size,
                        e->path);
 
-        if (r != 5) break;
+        if (r != 5)
+            break;
 
         hex_to_hash(hex, &e->hash);
         index->count++;
@@ -180,7 +186,7 @@ int index_save(const Index *index) {
         char hex[HASH_HEX_SIZE + 1];
         hash_to_hex(&index->entries[i].hash, hex);
 
-        fprintf(fp, "%o %s %ld %zu %s\n",
+        fprintf(fp, "%o %s %ld %u %s\n",
                 index->entries[i].mode,
                 hex,
                 index->entries[i].mtime_sec,
@@ -231,12 +237,14 @@ int index_add(Index *index, const char *path) {
     free(data);
 
     struct stat st;
-    stat(path, &st);
+    if (stat(path, &st) != 0)
+        return -1;
 
     IndexEntry *e = index_find(index, path);
 
     if (!e) {
-        if (index->count >= MAX_INDEX_ENTRIES) return -1;
+        if (index->count >= MAX_INDEX_ENTRIES)
+            return -1;
         e = &index->entries[index->count++];
     }
 
