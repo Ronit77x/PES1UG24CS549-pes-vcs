@@ -10,11 +10,15 @@
 //   "100644 hello.txt\0" followed by 32 raw bytes of SHA-256
 
 #include "tree.h"
+#include "pes.h"
+#include "index.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
+
+int object_write(ObjectType type, const void *data, size_t len, ObjectID *id_out);
 
 // ─── Mode Constants ─────────────────────────────────────────────────────────
 
@@ -130,10 +134,16 @@ int tree_serialize(const Tree *tree, void **data_out, size_t *len_out) {
 //
 // Returns 0 on success, -1 on error.
 int tree_from_index(ObjectID *id_out) {
-Index idx;
 
-if (index_load(&idx) != 0)
+FILE *fp = fopen(".pes/index", "rb");
+if (!fp) return -1;
+
+Index idx;
+if (fread(&idx, sizeof(Index), 1, fp) != 1) {
+    fclose(fp);
     return -1;
+}
+fclose(fp);
 
 Tree tree;
 tree.count = 0;
