@@ -229,7 +229,8 @@ free(data);
 
 if (head_update(&new_id) != 0)
     return -1;
+if (commit_id_out)
+    *commit_id_out = new_id;
 
-(void)commit_id_out;
-return -1;
+return 0;
 }
