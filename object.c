@@ -112,7 +112,44 @@ memcpy(buffer, header, header_len);
 memcpy(buffer + header_len, data, len);
 
 compute_hash(buffer, total_len, id_out);
-return -1;
+if (object_exists(id_out)) {
+    free(buffer);
+    return 0;
+}
+
+char final_path[512];
+object_path(id_out, final_path, sizeof(final_path));
+
+char dir_path[512];
+strcpy(dir_path, final_path);
+
+char *slash = strrchr(dir_path, '/');
+if (!slash) {
+    free(buffer);
+    return -1;
+}
+
+*slash = '\0';
+
+mkdir(OBJECTS_DIR, 0755);
+mkdir(dir_path, 0755);
+
+char temp_path[512];
+snprintf(temp_path, sizeof(temp_path), "%s/tmpXXXXXX", dir_path);
+
+int fd = mkstemp(temp_path);
+if (fd < 0) {
+    free(buffer);
+    return -1;
+}
+
+write(fd, buffer, total_len);
+close(fd);
+
+rename(temp_path, final_path);
+
+free(buffer);
+return 0;
 }
 
 // Read an object from the store.
