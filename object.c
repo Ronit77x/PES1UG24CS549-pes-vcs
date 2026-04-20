@@ -103,11 +103,15 @@ else type_str = "commit";
 
 char header[64];
 int header_len = snprintf(header, sizeof(header), "%s %zu", type_str, len) + 1;
+size_t total_len = header_len + len;
 
-(void)data;
-(void)id_out;
-(void)header_len;
+unsigned char *buffer = malloc(total_len);
+if (!buffer) return -1;
 
+memcpy(buffer, header, header_len);
+memcpy(buffer + header_len, data, len);
+
+compute_hash(buffer, total_len, id_out);
 return -1;
 }
 
