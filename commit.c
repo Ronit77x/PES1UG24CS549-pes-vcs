@@ -212,6 +212,13 @@ if (head_read(&parent_id) == 0) {
 strncpy(commit.author, pes_author(), sizeof(commit.author) - 1);
 commit.timestamp = (uint64_t)time(NULL);
 
+void *data;
+size_t len;
+
+if (commit_serialize(&commit, &data, &len) != 0)
+    return -1;
+
 (void)commit_id_out;
+free(data);
 return -1;
 }
