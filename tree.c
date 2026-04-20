@@ -154,6 +154,8 @@ size_t len;
 if (tree_serialize(&tree, &data, &len) != 0)
     return -1;
 
-(void)id_out;
-return -1;
+int result = object_write(OBJ_TREE, data, len, id_out);
+
+free(data);
+return result;
 }
