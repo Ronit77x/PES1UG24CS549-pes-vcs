@@ -203,8 +203,15 @@ if (tree_from_index(&commit.tree) != 0)
 
 strncpy(commit.message, message, sizeof(commit.message) - 1);
 
+ObjectID parent_id;
+if (head_read(&parent_id) == 0) {
+    commit.parent = parent_id;
+    commit.has_parent = 1;
+}
+
+strncpy(commit.author, pes_author(), sizeof(commit.author) - 1);
+commit.timestamp = (uint64_t)time(NULL);
+
 (void)commit_id_out;
 return -1;
-    (void)message; (void)commit_id_out;
-    return -1;
 }
