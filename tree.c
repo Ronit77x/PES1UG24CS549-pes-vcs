@@ -148,6 +148,11 @@ for (int i = 0; i < idx.count; i++) {
     strcpy(entry->name, idx.entries[i].path);
     entry->hash = idx.entries[i].hash;
 }
+void *data;
+size_t len;
+
+if (tree_serialize(&tree, &data, &len) != 0)
+    return -1;
 
 (void)id_out;
 return -1;
