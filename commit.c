@@ -218,7 +218,18 @@ size_t len;
 if (commit_serialize(&commit, &data, &len) != 0)
     return -1;
 
-(void)commit_id_out;
+ObjectID new_id;
+
+if (object_write(OBJ_COMMIT, data, len, &new_id) != 0) {
+    free(data);
+    return -1;
+}
+
 free(data);
+
+if (head_update(&new_id) != 0)
+    return -1;
+
+(void)commit_id_out;
 return -1;
 }
