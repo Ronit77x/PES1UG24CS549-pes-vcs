@@ -138,6 +138,17 @@ if (index_load(&idx) != 0)
 Tree tree;
 tree.count = 0;
 
+for (int i = 0; i < idx.count; i++) {
+    if (tree.count >= MAX_TREE_ENTRIES)
+        return -1;
+
+    TreeEntry *entry = &tree.entries[tree.count++];
+
+    entry->mode = idx.entries[i].mode;
+    strcpy(entry->name, idx.entries[i].path);
+    entry->hash = idx.entries[i].hash;
+}
+
 (void)id_out;
 return -1;
 }
