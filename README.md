@@ -26,11 +26,11 @@ The following files were completed as part of the lab:
 
 ### 1A - Output of `./test_objects`
 
-![Screenshot 1A](screenshots/1A_test_objects.png)
+![Screenshot 1A](Screenshots/1A_test_objects.png)
 
 ### 1B - Object Store Sharding Layout
 
-![Screenshot 1B](screenshots/1B_objects_structure.png)
+![Screenshot 1B](Screenshots/1B_objects_structure.png)
 
 ---
 
@@ -38,11 +38,11 @@ The following files were completed as part of the lab:
 
 ### 2A - Output of `./test_tree`
 
-![Screenshot 2A](screenshots/2A_test_tree.png)
+![Screenshot 2A](Screenshots/2A_test_tree.png)
 
 ### 2B - Raw Tree Object using `xxd`
 
-![Screenshot 2B](screenshots/2B_raw_tree_object.png)
+![Screenshot 2B](Screenshots/2B_raw_tree_object.png)
 
 ---
 
@@ -50,11 +50,11 @@ The following files were completed as part of the lab:
 
 ### 3A - Repository Initialization, Add, Status
 
-![Screenshot 3A](screenshots/3A_init_add_status.png)
+![Screenshot 3A](Screenshots/3A_init_add_status.png)
 
 ### 3B - Contents of `.pes/index`
 
-![Screenshot 3B](screenshots/3B_index_contents.png)
+![Screenshot 3B](Screenshots/3B_index_contents.png)
 
 ---
 
@@ -62,15 +62,15 @@ The following files were completed as part of the lab:
 
 ### 4A - Commit Log with Multiple Commits
 
-![Screenshot 4A](screenshots/4A_commit_log.png)
+![Screenshot 4A](Screenshots/4A_commit_log.png)
 
 ### 4B - `.pes` Internal File Growth
 
-![Screenshot 4B](screenshots/4B_pes_files.png)
+![Screenshot 4B](Screenshots/4B_pes_files.png)
 
 ### 4C - HEAD and Branch Reference Chain
 
-![Screenshot 4C](screenshots/4C_head_refs.png)
+![Screenshot 4C](Screenshots/4C_head_refs.png)
 
 ---
 
@@ -78,7 +78,7 @@ The following files were completed as part of the lab:
 
 ### Output of `make test-integration`
 
-![Integration Test](screenshots/final_integration_test.png)
+![Integration Test](Screenshots/final_integration_test.png)
 
 ---
 
